@@ -32,7 +32,7 @@ blogSchema.set('toJSON', {
         delete returnedObject._id
         delete returnedObject.__v
 
-        if (returnedObject.user) returnedObject.user = returnedObject.user.toString()
+        if (returnedObject.user.id) returnedObject.user.id = returnedObject.user.id.toString()
     }
 })
 
