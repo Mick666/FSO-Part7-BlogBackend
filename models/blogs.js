@@ -23,7 +23,12 @@ const blogSchema = mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    }
+    },
+    comments: [
+        {
+            type: String
+        }
+    ]
 })
 
 blogSchema.set('toJSON', {
@@ -31,8 +36,16 @@ blogSchema.set('toJSON', {
         returnedObject.id = returnedObject._id.toString()
         delete returnedObject._id
         delete returnedObject.__v
-
-        if (returnedObject.user && returnedObject.user.id) returnedObject.user.id = returnedObject.user.id.toString()
+        console.log('pre transformation...')
+        console.log(returnedObject)
+        // if (returnedObject.user) {
+        //     console.log('username is...')
+        //     console.log(returnedObject.user.username)
+        //     console.log(returnedObject.user.toString()) 
+        // }
+        if (returnedObject.user && returnedObject.user.username) returnedObject.user.id = returnedObject.user.id.toString()
+        console.log('post transformation...')
+        console.log(returnedObject)
     }
 })
 
