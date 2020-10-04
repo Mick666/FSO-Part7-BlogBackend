@@ -26,16 +26,35 @@ blogsRouter.post('/', async (request, response, next) => {
         user: user._id
     })
     const savedBlog = await blog.save()
+
+    const updatedUser = {
+        username: user.username,
+        name: user.name,
+        passwordHash: user.passwordHash,
+        blogs: user.blogs.concat(savedBlog._id)
+    }
+
+
+    const savedUser = await User.findByIdAndUpdate(decodedToken.id, updatedUser, { new: true })
+
     response.status(201).json(savedBlog)
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
-    console.log(request.token)
     if (request.token === null) return response.status(401).json({error: 'Invalid token'})
     const decodedToken = jwt.verify(request.token, process.env.SECRET)
     const blog = await Blog.findById(request.params.id)
     if (blog.user.toString() === decodedToken.id.toString()) {
         await Blog.findByIdAndRemove(request.params.id)
+        
+        let user = await User.findById(decodedToken.id)
+        const updatedUser = {
+            username: user.username,
+            name: user.name,
+            passwordHash: user.passwordHash,
+            blogs: user.blogs.filter(x => x.toString() !== request.params.id)
+        }
+        const savedUser = await User.findByIdAndUpdate(decodedToken.id, updatedUser, { new: true })
         return response.status(204).end();
     } 
     return response.status(401).json({error: 'Invalid token'})
@@ -47,7 +66,7 @@ blogsRouter.put('/:id', async (request, response) => {
         ...request.body,
         user: request.body.user.id
     }
-    updatedBlog = await Blog.findByIdAndUpdate(request.params.id, updatedBlog, { new: true });
+    updatedBlog = await Blog.findByIdAndUpdate(request.params.id, updatedBlog, { new: true })
     response.json(updatedBlog.toJSON())
 })
 
